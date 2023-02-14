@@ -3,17 +3,14 @@ package main
 import (
 	"fmt"
 	"html/template"
-	"log"
 	"net/http"
 	"strconv"
 )
 
 // Display the home page
-func home(w http.ResponseWriter, r *http.Request) {
+func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	// Check if the current request URL path exactly matches "/". If it doesn't
-	// the http.NotFound() function to send a 404 response to the client.
-	// Importantly, we then return from the handler. If we don't return the hand
-	// would keep executing and also write the "Hello from SnippetBox" message.
+	// use the http.NotFound() function to send a 404 response to the client.
 	if r.URL.Path != "/" {
 		http.NotFound(w, r)
 		return
@@ -27,20 +24,20 @@ func home(w http.ResponseWriter, r *http.Request) {
 	ts, err := template.ParseFiles(files...)
 
 	if err != nil {
-		log.Println(err.Error())
+		app.errorLog.Println(err.Error())
 		http.Error(w, "Internal Server Error", 500)
 		return
 	}
 
 	err = ts.Execute(w, nil)
 	if err != nil {
-		log.Println(err.Error())
+		app.errorLog.Println(err.Error())
 		http.Error(w, "Internal Server Error", 500)
 	}
 }
 
 // Add a showVaccine handler function
-func showVaccine(w http.ResponseWriter, r *http.Request) {
+func (app *application) showVaccine(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.URL.Query().Get("id"))
 	if err != nil || id < 1 {
 		http.NotFound(w, r)
@@ -51,10 +48,10 @@ func showVaccine(w http.ResponseWriter, r *http.Request) {
 }
 
 // Add a createVaccine handler function
-func createVaccine(w http.ResponseWriter, r *http.Request) {
+func (app *application) createVaccine(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		w.Header().Set("Allow", "POST")
-		// Use the http.Error() function to send a 405 status code and "Method N
+		// Use the http.Error() function to send a 405 status code and "Method Not
 		// Allowed" string as the response body.
 		http.Error(w, "Method Not Allowed", 405)
 		return
